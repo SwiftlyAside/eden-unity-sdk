@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="overlay-background" class="overlay-background">
+        <ui:VisualElement name="login-modal" style="login-modal">
+            <ui:VisualElement class="logo-container">
+                <ui:Image name="logo" class="logo" />
+            </ui:VisualElement>
+            <ui:TextField name="email-field" label="Email" />
+            <ui:TextField name="password-field" label="Password" />
+            <ui:Button name="login-button" text="Login" />
+            <ui:EnumField type="Editor.Scripts.Manager.Language, EdenStudio.Editor" name="language-field" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

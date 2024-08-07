@@ -2,63 +2,76 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public static class AuthManager
+namespace Editor.Scripts.Manager
 {
-    private static readonly string baseUrl = "https://api.eden-world.net/";
-    private static string authToken;
-    private static string refreshToken;
-    private static long tokenExpires;
-
-    public static IEnumerator Login(string email, string password, System.Action<bool> callback)
+    public static class AuthManager
     {
-        string loginUrl = baseUrl + "v2/auth/email/login";
-        var loginData = new
+        private const string baseUrl = "https://dev-api.eden-world.net/";
+        private const string loginEndpoint = "v2/auth/email/login";
+
+        private static string token;
+        private static string refreshToken;
+        private static double tokenExpires;
+        private static bool isAuthenticated = false;
+
+        public static bool IsAuthenticated => isAuthenticated;
+
+        public static IEnumerator Login(string email, string password, System.Action<bool> callback)
         {
-            email = email,
-            password = password
-        };
+            var loginUrl = baseUrl + loginEndpoint;
+            var formData = new WWWForm();
+            formData.AddField("email", email);
+            formData.AddField("password", password);
 
-        string jsonData = JsonUtility.ToJson(loginData);
-
-        using (UnityWebRequest request = new UnityWebRequest(loginUrl, "POST"))
-        {
-            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "application/json");
-
-            yield return request.SendWebRequest();
-
-            if (request.result == UnityWebRequest.Result.Success)
+            using (UnityWebRequest request = UnityWebRequest.Post(loginUrl, formData))
             {
-                var response = JsonUtility.FromJson<LoginResponse>(request.downloadHandler.text);
-                authToken = response.token;
-                refreshToken = response.refreshToken;
-                tokenExpires = response.tokenExpires;
+                request.SetRequestHeader("Content-Type", "application/json");
+                var jsonBody = JsonUtility.ToJson(new { email, password });
+                byte[] bodyRaw = new System.Text.UTF8Encoding().GetBytes(jsonBody);
+                request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+                request.downloadHandler = new DownloadHandlerBuffer();
 
-                Debug.Log("Login Successful");
-                callback(true);
-            }
-            else
-            {
-                Debug.LogError($"Login Failed: {request.error}");
-                callback(false);
+                yield return request.SendWebRequest();
+
+                if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+                {
+                    Debug.LogError($"Login Error: {request.error}");
+                    callback(false);
+                }
+                else
+                {
+                    var jsonResponse = request.downloadHandler.text;
+                    var response = JsonUtility.FromJson<LoginResponse>(jsonResponse);
+                    token = response.token;
+                    refreshToken = response.refreshToken;
+                    tokenExpires = response.tokenExpires;
+                    isAuthenticated = true;
+                    callback(true);
+                }
             }
         }
-    }
+        
+        public static void Logout()
+        {
+            token = null;
+            refreshToken = null;
+            tokenExpires = 0;
+            isAuthenticated = false;
+        }
 
-    [System.Serializable]
-    private class LoginResponse
-    {
-        public string token;
-        public string refreshToken;
-        public long tokenExpires;
-        public User user;
-    }
+        [System.Serializable]
+        private class LoginResponse
+        {
+            public string token;
+            public string refreshToken;
+            public double tokenExpires;
+            public User user;
+        }
 
-    [System.Serializable]
-    private class User
-    {
-        // Define user properties here
+        [System.Serializable]
+        private class User
+        {
+            // Define user fields here
+        }
     }
 }

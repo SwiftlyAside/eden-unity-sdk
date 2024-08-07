@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Editor.Resources.Components;
 using Editor.Scripts;
+using Editor.Scripts.Common;
 using Editor.Scripts.Manager;
 using Editor.Scripts.Struct;
 using UniGLTF;
@@ -79,7 +80,7 @@ namespace Editor.Resources.Screens.Export
             var visualTree = UnityEngine.Resources.Load<VisualTreeAsset>("Screens/Export/ExportVrm");
             visualTree.CloneTree(_container);
             _exportButton = _container.Q<Button>("exportButton");
-            _exportButton.clicked += () => ExportItem(true);
+            _exportButton.clicked += () => SDKWrapper.ExportItem();
             _backButton = _container.Q<Button>("backButton");
             _backButton.clicked += onBackClicked;
             _preview = new Preview(_container.Q("preview"), EdenStudioInitializer.SelectedItem?.path ?? "");
@@ -269,7 +270,7 @@ namespace Editor.Resources.Screens.Export
             _blendShapeKeys = _blendShapeDataMap.Keys.ToList();
         }
 
-        private static void ExportItem(bool toVrm0 = false)
+        internal static void ExportItem(bool toVrm0 = false)
         {
             // Export the selected item
             var prefabPath = EdenStudioInitializer.SelectedItem.path;
@@ -392,7 +393,7 @@ namespace Editor.Resources.Screens.Export
             EditorUtility.DisplayDialog("Exported", "The item has been exported to VRM format.", "OK");
         }
 
-        private static void ExportToVrm0(GameObject instance, string savePath)
+        internal static void ExportToVrm0(GameObject instance, string savePath)
         {
             using (var tempDisposable = new TempDisposable())
             {
