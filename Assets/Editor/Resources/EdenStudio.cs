@@ -91,12 +91,22 @@ namespace Editor.Resources
         
         private void OnSettingsClicked()
         {
-            Settings.Show(container);
+            Settings.Show(container, OnLogoutClicked);
         }
 
         private void OnBackClicked()
         {
             Export.Show(container, OnExportVrmClicked);
+        }
+        
+        private void OnLogoutClicked()
+        {
+            Debug.Log("Logout clicked");
+            AuthManager.Logout(() =>
+            {
+                Debug.Log("Logout success");
+                ShowLoginModal();
+            });
         }
         
         private void ShowLoginModal()

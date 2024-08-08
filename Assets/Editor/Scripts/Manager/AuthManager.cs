@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -12,6 +14,7 @@ namespace Editor.Scripts.Manager
         private static string token;
         private static string refreshToken;
         private static double tokenExpires;
+        private static string userEmail;
 
         public static bool IsAuthenticated { get; private set; }
 
@@ -20,15 +23,16 @@ namespace Editor.Scripts.Manager
             token = PlayerPrefs.GetString("token");
             refreshToken = PlayerPrefs.GetString("refreshToken");
             tokenExpires = PlayerPrefs.GetString("tokenExpires", "0") == "0" ? 0 : double.Parse(PlayerPrefs.GetString("tokenExpires"));
+            userEmail = PlayerPrefs.GetString("userEmail");
             IsAuthenticated = !string.IsNullOrEmpty(token) && !string.IsNullOrEmpty(refreshToken) && tokenExpires > Time.time;
         }
 
-        public static IEnumerator Login(string email, string password, System.Action<bool> callback)
+        public static IEnumerator Login(string email, string password, Action<bool> callback)
         {
             var loginUrl = baseUrl + loginEndpoint;
             using var request = UnityWebRequest.PostWwwForm(loginUrl, "");
             var jsonBody = JsonUtility.ToJson(new LoginRequest { email = email, password = password });
-            byte[] bodyRaw = new System.Text.UTF8Encoding().GetBytes(jsonBody);
+            byte[] bodyRaw = new UTF8Encoding().GetBytes(jsonBody);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
@@ -49,17 +53,20 @@ namespace Editor.Scripts.Manager
                 token = response.token;
                 refreshToken = response.refreshToken;
                 tokenExpires = response.tokenExpires;
+                userEmail = response.user.email;
                 IsAuthenticated = true;
                     
                 PlayerPrefs.SetString("token", token);
                 PlayerPrefs.SetString("refreshToken", refreshToken);
                 PlayerPrefs.SetString("tokenExpires", tokenExpires.ToString());
+                PlayerPrefs.SetString("userEmail", userEmail);
                 PlayerPrefs.Save();
+                
                 callback(true);
             }
         }
         
-        public static void Logout()
+        public static void Logout(Action callback)
         {
             token = null;
             refreshToken = null;
@@ -69,16 +76,17 @@ namespace Editor.Scripts.Manager
             PlayerPrefs.DeleteKey("refreshToken");
             PlayerPrefs.DeleteKey("tokenExpires");
             PlayerPrefs.Save();
+            callback();
         }
 
-        [System.Serializable]
+        [Serializable]
         private class LoginRequest
         {
             public string email;
             public string password;
         }
 
-        [System.Serializable]
+        [Serializable]
         private class LoginResponse
         {
             public string token;
@@ -87,10 +95,11 @@ namespace Editor.Scripts.Manager
             public User user;
         }
 
-        [System.Serializable]
+        [Serializable]
         private class User
         {
             // Define user fields here
+            public string email;
         }
     }
 }

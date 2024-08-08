@@ -16,7 +16,7 @@ namespace Editor.Resources.Screens.Setting
         private static EnumField _languageDropdown;
         private static Button _logoutButton;
 
-        public static void Show(VisualElement root)
+        public static void Show(VisualElement root, Action onLogoutClicked)
         {
             _container = root;
             _container.Clear();
@@ -30,7 +30,7 @@ namespace Editor.Resources.Screens.Setting
             
             LocalizationManager.OnLanguageChanged += RefreshLocalization;
             _languageDropdown.RegisterValueChangedCallback(OnLanguageChanged);
-            _logoutButton.clicked += OnLogoutClicked;
+            _logoutButton.clicked += onLogoutClicked;
         }
         
         
@@ -40,12 +40,6 @@ namespace Editor.Resources.Screens.Setting
             _emailLabel.text = LocalizationManager.GetLocalizedValue("email");
             _languageLabel.text = LocalizationManager.GetLocalizedValue("language");
             _logoutButton.text = LocalizationManager.GetLocalizedValue("logout");
-        }
-        
-        private static void OnLogoutClicked()
-        {
-            Debug.Log("Logout clicked");
-            AuthManager.Logout();
         }
         
         private static void OnLanguageChanged(ChangeEvent<Enum> evt)
