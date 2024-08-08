@@ -71,6 +71,14 @@
     {
       "key": "language",
       "value": "언어"
+    },
+    {
+      "key": "logout",
+      "value": "로그아웃"
+    },
+    {
+      "key": "email",
+      "value": "이메일"
     }
   ]
 }

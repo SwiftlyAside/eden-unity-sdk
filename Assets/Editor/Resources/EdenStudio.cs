@@ -1,5 +1,6 @@
 using System;
 using Editor.Resources.Screens.Export;
+using Editor.Resources.Screens.Setting;
 using Editor.Scripts.Manager;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
@@ -21,6 +22,8 @@ namespace Editor.Resources
 
         public static StyleSheet style;
         public static StyleSheet tailwind;
+        private static Button prefab_list_button;
+        private static Button settings_button;
         private static Label prefab_list_label;
         private static Label settings_label;
         private static EnumField languageDropdown;
@@ -48,21 +51,23 @@ namespace Editor.Resources
             VisualElement labelFromUXML = m_VisualTreeAsset.Instantiate();
             root.Add(labelFromUXML);
             container = labelFromUXML.Q("container");
+            prefab_list_button = labelFromUXML.Q<Button>("prefab_list_button");
             prefab_list_label = labelFromUXML.Q<Label>("prefab_list_label");
+            settings_button = labelFromUXML.Q<Button>("settings_button");
             settings_label = labelFromUXML.Q<Label>("settings_label");
-            languageDropdown = labelFromUXML.Q<EnumField>("language_field");
             
             LocalizationManager.OnLanguageChanged += () =>
             {
                 prefab_list_label.text = LocalizationManager.GetLocalizedValue("prefab_list");
                 settings_label.text = LocalizationManager.GetLocalizedValue("settings");
-                languageDropdown.label = LocalizationManager.GetLocalizedValue("language");
             };
             
-            languageDropdown.RegisterValueChangedCallback(OnLanguageChanged);
             prefab_list_label.text = LocalizationManager.GetLocalizedValue("prefab_list");
             settings_label.text = LocalizationManager.GetLocalizedValue("settings");
-            languageDropdown.label = LocalizationManager.GetLocalizedValue("language");
+            
+            prefab_list_button.clicked += OnExportClicked;
+            settings_button.clicked += OnSettingsClicked;
+            
             Export.Show(container, OnExportVrmClicked);
             ShowLoginModal();
         }
@@ -78,6 +83,16 @@ namespace Editor.Resources
         {
             ExportVrm.Show(container, OnBackClicked);
         }
+        
+        private void OnExportClicked()
+        {
+            Export.Show(container, OnExportVrmClicked);
+        }
+        
+        private void OnSettingsClicked()
+        {
+            Settings.Show(container);
+        }
 
         private void OnBackClicked()
         {
@@ -86,6 +101,12 @@ namespace Editor.Resources
         
         private void ShowLoginModal()
         {
+            AuthManager.Initialize();
+            // 로그인 되어 있는지 확인
+            if (AuthManager.IsAuthenticated)
+            {
+                return;
+            }
             if (loginVisualTreeAsset == null)
             {
                 loginVisualTreeAsset = UnityEngine.Resources.Load<VisualTreeAsset>("Components/LoginModal");
@@ -106,6 +127,8 @@ namespace Editor.Resources
             passwordField.isPasswordField = true;
             var loginButton = loginModalContainer.Q<Button>("login-button");
             var lang = loginModalContainer.Q<EnumField>("language-field");
+            var resetPasswordButton = loginModalContainer.Q<Button>("reset-password");
+            var registerButton = loginModalContainer.Q<Button>("register");
             
             var logo = loginModalContainer.Q<Image>("logo");
             if (logo == null)
@@ -134,14 +157,26 @@ namespace Editor.Resources
                 }
             };
             
-            lang.RegisterValueChangedCallback(OnLanguageChanged);
+            resetPasswordButton.clicked += () =>
+            {
+                Debug.Log("Reset password button clicked");
+                // go to reset password web page
+                Application.OpenURL("https://eden-world.net/reset-password");
+            };
             
+            registerButton.clicked += () =>
+            {
+                Debug.Log("Register button clicked");
+                // go to register web page
+                Application.OpenURL("https://eden-world.net/login");
+            };
+            
+            lang.RegisterValueChangedCallback(OnLanguageChanged);
         }
 
         private void ExecuteLogin(string email, string password)
         {
             isLoggingIn = true;  
-            Debug.Log($"Logging in with email: {email} and password: {password}");
             EditorCoroutineUtility.StartCoroutine(AuthManager.Login(email, password, OnLoginResult), this);
         }
 
@@ -151,7 +186,9 @@ namespace Editor.Resources
             isLoggingIn = false;
             if (success)
             {
-                rootVisualElement.Remove(loginModal);
+                var main = rootVisualElement.Q("main");
+                var loginModalContainer = main.Q("overlay-background");
+                main.Remove(loginModalContainer);
                 loginModal = null;
             }
             else

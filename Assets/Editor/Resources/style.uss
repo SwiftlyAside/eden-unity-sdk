@@ -208,26 +208,31 @@ ItemButton Label {
     background-color: var(--gray-50);
 }
 
+DropdownField {
+    width: 100%;
+    align-items: flex-start;
+}
+
 .blend-shape-item DropdownField {
     width: 100%;
     align-items: flex-start;
     background-color: var(--gray-50);
 }
 
-.blend-shape-item DropdownField Label {
+DropdownField Label {
     margin-bottom: 4px;
     color: var(--black);
     background-color: var(--gray-50);
 }
 
-.blend-shape-item DropdownField VisualElement,
+DropdownField VisualElement,
 EnumField VisualElement {
     background-color: white;
     border-color: var(--default);
     padding: 6px 16px;
 }
 
-.blend-shape-item DropdownField VisualElement PopupTextElement,
+DropdownField VisualElement PopupTextElement,
 EnumField VisualElement TextElement {
     color: var(--black);
     background-color: white;
@@ -360,4 +365,38 @@ TextField:disabled {
     font-size: 24px;
     margin-bottom: 20px;
     text-align: center;
+}
+
+.section Label {
+    margin-bottom: 4px;
+    color: var(--black);
+}
+
+.button-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.button-container Button {
+    margin: 0 10px;
+    background-color: white;
+}
+
+.button-container Button:hover {
+    background-color: var(--primary-hover);
+    color: white;
+}
+
+.logout-button {
+    background-color: var(--danger);
+    color: white;
+}
+
+.logout-button:hover {
+    background-color: var(--danger-hover);
+}
+
+.logout-button:active {
+    background-color: var(--danger-active);
 }

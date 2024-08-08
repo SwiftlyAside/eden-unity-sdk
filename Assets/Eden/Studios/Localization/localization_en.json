@@ -71,6 +71,14 @@
     {
       "key": "language",
       "value": "Language"
+    },
+    {
+      "key": "logout",
+      "value": "Logout"
+    },
+    {
+      "key": "email",
+      "value": "Email"
     }
   ]
 }

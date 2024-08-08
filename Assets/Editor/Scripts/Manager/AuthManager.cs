@@ -12,42 +12,50 @@ namespace Editor.Scripts.Manager
         private static string token;
         private static string refreshToken;
         private static double tokenExpires;
-        private static bool isAuthenticated = false;
 
-        public static bool IsAuthenticated => isAuthenticated;
+        public static bool IsAuthenticated { get; private set; }
+
+        public static void Initialize()
+        {
+            token = PlayerPrefs.GetString("token");
+            refreshToken = PlayerPrefs.GetString("refreshToken");
+            tokenExpires = PlayerPrefs.GetString("tokenExpires", "0") == "0" ? 0 : double.Parse(PlayerPrefs.GetString("tokenExpires"));
+            IsAuthenticated = !string.IsNullOrEmpty(token) && !string.IsNullOrEmpty(refreshToken) && tokenExpires > Time.time;
+        }
 
         public static IEnumerator Login(string email, string password, System.Action<bool> callback)
         {
             var loginUrl = baseUrl + loginEndpoint;
-            var formData = new WWWForm();
-            formData.AddField("email", email);
-            formData.AddField("password", password);
+            using var request = UnityWebRequest.PostWwwForm(loginUrl, "");
+            var jsonBody = JsonUtility.ToJson(new LoginRequest { email = email, password = password });
+            byte[] bodyRaw = new System.Text.UTF8Encoding().GetBytes(jsonBody);
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
 
-            using (UnityWebRequest request = UnityWebRequest.Post(loginUrl, formData))
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
             {
-                request.SetRequestHeader("Content-Type", "application/json");
-                var jsonBody = JsonUtility.ToJson(new { email, password });
-                byte[] bodyRaw = new System.Text.UTF8Encoding().GetBytes(jsonBody);
-                request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-                request.downloadHandler = new DownloadHandlerBuffer();
-
-                yield return request.SendWebRequest();
-
-                if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
-                {
-                    Debug.LogError($"Login Error: {request.error}");
-                    callback(false);
-                }
-                else
-                {
-                    var jsonResponse = request.downloadHandler.text;
-                    var response = JsonUtility.FromJson<LoginResponse>(jsonResponse);
-                    token = response.token;
-                    refreshToken = response.refreshToken;
-                    tokenExpires = response.tokenExpires;
-                    isAuthenticated = true;
-                    callback(true);
-                }
+                Debug.LogError($"Payload: {jsonBody}");
+                Debug.LogError($"Login Error: {request.error}");
+                Debug.LogError($"Login Response: {request.downloadHandler.text}");
+                callback(false);
+            }
+            else
+            {
+                var jsonResponse = request.downloadHandler.text;
+                var response = JsonUtility.FromJson<LoginResponse>(jsonResponse);
+                token = response.token;
+                refreshToken = response.refreshToken;
+                tokenExpires = response.tokenExpires;
+                IsAuthenticated = true;
+                    
+                PlayerPrefs.SetString("token", token);
+                PlayerPrefs.SetString("refreshToken", refreshToken);
+                PlayerPrefs.SetString("tokenExpires", tokenExpires.ToString());
+                PlayerPrefs.Save();
+                callback(true);
             }
         }
         
@@ -56,7 +64,18 @@ namespace Editor.Scripts.Manager
             token = null;
             refreshToken = null;
             tokenExpires = 0;
-            isAuthenticated = false;
+            IsAuthenticated = false;
+            PlayerPrefs.DeleteKey("token");
+            PlayerPrefs.DeleteKey("refreshToken");
+            PlayerPrefs.DeleteKey("tokenExpires");
+            PlayerPrefs.Save();
+        }
+
+        [System.Serializable]
+        private class LoginRequest
+        {
+            public string email;
+            public string password;
         }
 
         [System.Serializable]
