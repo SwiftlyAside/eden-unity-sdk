@@ -79,6 +79,10 @@
     {
       "key": "email",
       "value": "Email"
+    },
+    {
+      "key": "register_info",
+      "value": "Please create a new account for existing EDEN members."
     }
   ]
 }

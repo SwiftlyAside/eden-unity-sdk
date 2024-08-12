@@ -11,20 +11,21 @@ namespace Editor.Scripts.Manager
         private const string baseUrl = "https://dev-api.eden-world.net/";
         private const string loginEndpoint = "v2/auth/email/login";
 
-        private static string token;
-        private static string refreshToken;
-        private static double tokenExpires;
-        private static string userEmail;
+        private static string _token;
+        private static string _refreshToken;
+        private static double _tokenExpires;
+
+        public static string UserEmail { get; private set; }
 
         public static bool IsAuthenticated { get; private set; }
 
         public static void Initialize()
         {
-            token = PlayerPrefs.GetString("token");
-            refreshToken = PlayerPrefs.GetString("refreshToken");
-            tokenExpires = PlayerPrefs.GetString("tokenExpires", "0") == "0" ? 0 : double.Parse(PlayerPrefs.GetString("tokenExpires"));
-            userEmail = PlayerPrefs.GetString("userEmail");
-            IsAuthenticated = !string.IsNullOrEmpty(token) && !string.IsNullOrEmpty(refreshToken) && tokenExpires > Time.time;
+            _token = PlayerPrefs.GetString("token");
+            _refreshToken = PlayerPrefs.GetString("refreshToken");
+            _tokenExpires = PlayerPrefs.GetString("tokenExpires", "0") == "0" ? 0 : double.Parse(PlayerPrefs.GetString("tokenExpires"));
+            UserEmail = PlayerPrefs.GetString("userEmail");
+            IsAuthenticated = !string.IsNullOrEmpty(_token) && !string.IsNullOrEmpty(_refreshToken) && _tokenExpires > Time.time;
         }
 
         public static IEnumerator Login(string email, string password, Action<bool> callback)
@@ -50,16 +51,16 @@ namespace Editor.Scripts.Manager
             {
                 var jsonResponse = request.downloadHandler.text;
                 var response = JsonUtility.FromJson<LoginResponse>(jsonResponse);
-                token = response.token;
-                refreshToken = response.refreshToken;
-                tokenExpires = response.tokenExpires;
-                userEmail = response.user.email;
+                _token = response.token;
+                _refreshToken = response.refreshToken;
+                _tokenExpires = response.tokenExpires;
+                UserEmail = response.user.email;
                 IsAuthenticated = true;
                     
-                PlayerPrefs.SetString("token", token);
-                PlayerPrefs.SetString("refreshToken", refreshToken);
-                PlayerPrefs.SetString("tokenExpires", tokenExpires.ToString());
-                PlayerPrefs.SetString("userEmail", userEmail);
+                PlayerPrefs.SetString("token", _token);
+                PlayerPrefs.SetString("refreshToken", _refreshToken);
+                PlayerPrefs.SetString("tokenExpires", _tokenExpires.ToString());
+                PlayerPrefs.SetString("userEmail", UserEmail);
                 PlayerPrefs.Save();
                 
                 callback(true);
@@ -68,9 +69,9 @@ namespace Editor.Scripts.Manager
         
         public static void Logout(Action callback)
         {
-            token = null;
-            refreshToken = null;
-            tokenExpires = 0;
+            _token = null;
+            _refreshToken = null;
+            _tokenExpires = 0;
             IsAuthenticated = false;
             PlayerPrefs.DeleteKey("token");
             PlayerPrefs.DeleteKey("refreshToken");

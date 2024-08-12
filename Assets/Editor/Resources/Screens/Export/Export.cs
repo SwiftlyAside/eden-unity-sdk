@@ -114,23 +114,25 @@ namespace Editor.Resources.Screens.Export
         private static void OnImportItemsCompleted(string[] importedAssets)
         {
             AssetDatabase.onImportPackageItemsCompleted -= OnImportItemsCompleted;
-            LoadItems();
+            LoadItems(true);
         }
 
-        private static async void LoadItems()
+        private static async void LoadItems(bool fullRefresh = false)
         {
             await Task.Yield();
-            GetItems();
+            GetItems(fullRefresh);
         }
 
-        private static async void GetItems()
+        private static async void GetItems(bool fullRefresh = false)
         {
             _scrollView.Clear();
-            _items = ItemManager.GetItemsInfo();
             
-            if (_items == null)
+            if (fullRefresh)
             {
                 _items = ItemManager.GetAllPrefabsAsItems();
+            } else if (_items == null)
+            {
+                _items = ItemManager.GetItemsInfo();
             }
 
             if (_items.Count == 0)

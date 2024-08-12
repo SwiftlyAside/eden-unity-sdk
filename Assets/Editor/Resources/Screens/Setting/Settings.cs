@@ -15,6 +15,7 @@ namespace Editor.Resources.Screens.Setting
         private static Label _languageLabel;
         private static EnumField _languageDropdown;
         private static Button _logoutButton;
+        private static TextField _emailField;
 
         public static void Show(VisualElement root, Action onLogoutClicked)
         {
@@ -24,6 +25,7 @@ namespace Editor.Resources.Screens.Setting
             visualTree.CloneTree(_container);
             _title = _container.Q<Label>("title");
             _emailLabel = _container.Q<Label>("email_label");
+            _emailField = _container.Q<TextField>("email_field");
             _languageLabel = _container.Q<Label>("language_label");
             _languageDropdown = _container.Q<EnumField>("language_field");
             _logoutButton = _container.Q<Button>("logout_button");
@@ -31,6 +33,7 @@ namespace Editor.Resources.Screens.Setting
             LocalizationManager.OnLanguageChanged += RefreshLocalization;
             _languageDropdown.RegisterValueChangedCallback(OnLanguageChanged);
             _logoutButton.clicked += onLogoutClicked;
+            _emailField.value = AuthManager.IsAuthenticated ? AuthManager.UserEmail : "";
         }
         
         

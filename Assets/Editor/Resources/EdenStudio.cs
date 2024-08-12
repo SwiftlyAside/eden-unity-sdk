@@ -136,6 +136,13 @@ namespace Editor.Resources
             var passwordField = loginModalContainer.Q<TextField>("password-field");
             passwordField.isPasswordField = true;
             var loginButton = loginModalContainer.Q<Button>("login-button");
+            var registerInfo = loginModalContainer.Q<Label>("register-info");
+            LocalizationManager.OnLanguageChanged += () =>
+            {
+                registerInfo.text = LocalizationManager.GetLocalizedValue("register_info");
+            };
+            registerInfo.text = LocalizationManager.GetLocalizedValue("register_info");
+            
             var lang = loginModalContainer.Q<EnumField>("language-field");
             var resetPasswordButton = loginModalContainer.Q<Button>("reset-password");
             var registerButton = loginModalContainer.Q<Button>("register");

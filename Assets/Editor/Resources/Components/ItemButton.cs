@@ -14,7 +14,6 @@ namespace Editor.Resources.Components
         
         public ItemButton(ItemInfo item, Action onClick)
         {
-            Debug.Log($"ItemButton: {item.modelName}");
             _selectedItem = item;
             _selectedCategory = item.slot;
             
@@ -80,7 +79,6 @@ namespace Editor.Resources.Components
 
         private void OnDropdownChanged(ChangeEvent<string> evt)
         {
-            Debug.Log($"Dropdown changed to {evt.newValue}");
             var category = (ItemInfo.ModelSlot)Enum.Parse(typeof(ItemInfo.ModelSlot), evt.newValue);
             _selectedCategory = category;
             _selectedItem.slot = category;

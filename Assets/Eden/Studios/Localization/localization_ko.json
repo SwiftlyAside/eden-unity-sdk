@@ -79,6 +79,10 @@
     {
       "key": "email",
       "value": "이메일"
+    },
+    {
+      "key": "register_info",
+      "value": "기존 EDEN 회원은 새로운 계정을 생성해주세요."
     }
   ]
 }

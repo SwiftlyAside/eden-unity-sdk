@@ -32,8 +32,6 @@ namespace Editor.Scripts.Manager
             
             if (allItems == null) allItems = GetAllPrefabsAsItems();
 
-            Debug.Log(allItems.Count);
-
             allItems = allItems.OrderByDescending(i => i.status == ItemInfo.ModelStatus.Pinned)
                 .ThenByDescending(i => i.lastModified)
                 .ToList();
@@ -48,7 +46,6 @@ namespace Editor.Scripts.Manager
         internal static void UpdateItemInfo(ItemInfo item, ItemInfo.ModelSlot slot)
         {
             var items = ItemsInfoList;
-            Debug.Log($"UpdateItemInfo: {item.modelName} to {slot}, path: {item.path}");
             var index = items.FindIndex(i => i.path == item.path && i.modelName == item.modelName);
             items[index].slot = slot;
             SaveItemsInfo(items);
