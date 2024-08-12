@@ -38,7 +38,7 @@ using VRMInitializer = Editor.Scripts.Util.VRMInitializer;
 
 namespace Editor.Scripts.Manager
 {
-    public class ConvertManager
+    internal class ConvertManager
     {
         private static readonly string TempPath = "Assets/Eden/Temp";
         private static readonly string TempPrefabName = "temp.prefab";
@@ -108,7 +108,7 @@ namespace Editor.Scripts.Manager
             ChangeMaterials(gameObject, TempPath);
         }
 
-        public static void ConvertVrm0(
+        internal static void ConvertVrm0(
             string path,
             GameObject gameObject,
             VRMMetaObject vrmMetaObject,

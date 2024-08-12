@@ -1,0 +1,17 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="overlay-background" class="overlay-background">
+        <ui:VisualElement name="login-modal">
+            <ui:VisualElement class="logo-container">
+                <ui:Image name="logo" class="logo" />
+            </ui:VisualElement>
+            <ui:TextField name="email-field" label="Email" />
+            <ui:TextField name="password-field" label="Password" />
+            <ui:Button name="login-button" text="Login" class="primary" />
+            <ui:VisualElement style="flex-grow: 1; flex-direction: row;" class="mt-4 mb-4 button-container">
+                <ui:Button text="Reset password" parse-escape-sequences="true" display-tooltip-when-elided="true" name="reset-password" />
+                <ui:Button text="Register" parse-escape-sequences="true" display-tooltip-when-elided="true" name="register" />
+            </ui:VisualElement>
+            <ui:EnumField type="Editor.Scripts.Manager.Language, EdenStudio.Editor" name="language-field" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

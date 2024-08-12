@@ -20,6 +20,9 @@ MonoBehaviour:
   - skinnedMeshRendererPath: Body
     index: 242
     shapeKeyName: mouth_a
+  - skinnedMeshRendererPath: Body
+    index: 9
+    shapeKeyName: "mouth_\u2227"
   angry:
   - skinnedMeshRendererPath: Body
     index: 100
@@ -60,3 +63,6 @@ MonoBehaviour:
   - skinnedMeshRendererPath: Body
     index: 321
     shapeKeyName: brow_joy
+  - skinnedMeshRendererPath: Body
+    index: 16
+    shapeKeyName: vrc.looking_up
