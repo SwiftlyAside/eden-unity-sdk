@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -27,7 +28,9 @@ namespace Editor.Scripts.Manager
 
         public static void UpdateItemsInfo()
         {
-            var allItems = GetAllPrefabsAsItems();
+            var allItems = GetItemsInfo();
+            
+            if (allItems == null) allItems = GetAllPrefabsAsItems();
 
             Debug.Log(allItems.Count);
 
@@ -41,6 +44,15 @@ namespace Editor.Scripts.Manager
                 ItemsInfoList = allItems;
             }
         }
+        
+        internal static void UpdateItemInfo(ItemInfo item, ItemInfo.ModelSlot slot)
+        {
+            var items = ItemsInfoList;
+            Debug.Log($"UpdateItemInfo: {item.modelName} to {slot}, path: {item.path}");
+            var index = items.FindIndex(i => i.path == item.path && i.modelName == item.modelName);
+            items[index].slot = slot;
+            SaveItemsInfo(items);
+        }
 
         internal static void SaveItemsInfo(List<ItemInfo> items)
         {
@@ -51,23 +63,32 @@ namespace Editor.Scripts.Manager
                 Directory.CreateDirectory(directory);
             }
 
-            using (FileStream fileStream = new FileStream(ItemsInfoPath, FileMode.Create))
-            {
-                var itemsInfo = ScriptableObject.CreateInstance<ItemInfoList>();
-                itemsInfo.items = items;
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(fileStream, itemsInfo.ToData());
-            }
+            var json = JsonUtility.ToJson(new ItemInfoList { items = items }.ToData() );
+            File.WriteAllText(ItemsInfoPath, json);
+
+            // 저장 후 ItemsInfoList 업데이트
+            ItemsInfoList = items;
         }
 
         internal static List<ItemInfo> GetItemsInfo()
         {
             if (ItemsInfoList != null) return ItemsInfoList;
 
-            using (FileStream fileStream = new FileStream(ItemsInfoPath, FileMode.Open))
+            if (File.Exists(ItemsInfoPath))
             {
-                BinaryFormatter formatter = new BinaryFormatter();
-                ItemsInfoList = (List<ItemInfo>)formatter.Deserialize(fileStream);
+                var json = File.ReadAllText(ItemsInfoPath);
+                var itemsInfoList = JsonUtility.FromJson<ItemInfoListData>(json);
+                ItemsInfoList = itemsInfoList.items.Select(i => new ItemInfo
+                {
+                    path = i.path,
+                    modelName = i.modelName,
+                    lastModified = i.lastModified,
+                    type = (ItemInfo.ModelType) i.type,
+                    slot = (ItemInfo.ModelSlot) i.slot,
+                    status = (ItemInfo.ModelStatus) i.status,
+                    preview = null,
+                    SelectedBlendShapes = i.SelectedBlendShapes
+                }).ToList();
             }
 
             return ItemsInfoList;
@@ -80,7 +101,7 @@ namespace Editor.Scripts.Manager
             return guids
                 .Select(AssetDatabase.GUIDToAssetPath)
                 .Select(GetItem)
-                .OrderByDescending(p => p.lastModified)
+                .OrderByDescending(p => p.modelName)
                 .ToList();
         }
 

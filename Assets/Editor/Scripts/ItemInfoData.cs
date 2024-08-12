@@ -8,7 +8,7 @@ namespace Editor.Scripts
     public class ItemInfoData
     {
         public enum ModelType { VRChat, VRM, Other }
-        public enum ModelSlot { Head, Body, Legs, Feet, Hands, Other }
+        public enum ModelSlot { None, Model, Head, UpperBody, LowerBody, Hand, Foot, FullBody, Accessory, Effect, Other }
         public enum ModelStatus { Pinned, Show, Hidden, Other }
 
         public string path;

@@ -126,7 +126,12 @@ namespace Editor.Resources.Screens.Export
         private static async void GetItems()
         {
             _scrollView.Clear();
-            _items = ItemManager.GetAllPrefabsAsItems(true);
+            _items = ItemManager.GetItemsInfo();
+            
+            if (_items == null)
+            {
+                _items = ItemManager.GetAllPrefabsAsItems();
+            }
 
             if (_items.Count == 0)
             {
@@ -140,9 +145,10 @@ namespace Editor.Resources.Screens.Export
                 return;
             }
 
-            foreach (var itemElement in _items.Select(item =>
-                         new ItemButton(item, () => { EdenStudioInitializer.SelectedItem = item; })))
+            foreach (var item in _items)
             {
+                Debug.Log($"Item: {item.modelName}");
+                var itemElement = new ItemButton(item, () => { EdenStudioInitializer.SelectedItem = item; });
                 _scrollView.Add(itemElement);
                 await Task.Yield();
             }

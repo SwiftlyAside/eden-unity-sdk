@@ -9,11 +9,12 @@ namespace Editor.Scripts
     public class ItemInfo : ScriptableObject
     {
         public enum ModelType { VRChat, VRM, Other }
-        public enum ModelSlot { Head, Body, Legs, Feet, Hands, Other }
+        // 미선택, 아바타 모델, 머리, 상반신, 하반신, 손, 발, 전신, 악세사리, 효과, 기타
+        public enum ModelSlot { None, Model, Head, UpperBody, LowerBody, Hand, Foot, FullBody, Accessory, Effect, Other }
         public enum ModelStatus { Pinned, Show, Hidden, Other }
 
         public string path;
-        public string modelName;
+        public string modelName; 
         public string lastModified;
         public ModelType type;
         public ModelSlot slot;
