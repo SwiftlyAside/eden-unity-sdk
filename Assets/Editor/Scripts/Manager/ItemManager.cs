@@ -1,10 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using Editor.Scripts.Struct;
 using Editor.Scripts.Util;
 using UnityEditor;
 using UnityEngine;
@@ -30,7 +27,7 @@ namespace Editor.Scripts.Manager
         public static void UpdateItemsInfo()
         {
             var allItems = GetItemsInfo();
-            
+
             if (allItems == null) allItems = GetAllPrefabsAsItems();
 
             allItems = allItems.OrderByDescending(i => i.status == ItemInfo.ModelStatus.Pinned)
@@ -43,7 +40,7 @@ namespace Editor.Scripts.Manager
                 ItemsInfoList = allItems;
             }
         }
-        
+
         internal static void UpdateItemInfo(ItemInfo item, ItemInfo.ModelSlot slot)
         {
             var items = ItemsInfoList;
@@ -61,7 +58,7 @@ namespace Editor.Scripts.Manager
                 Directory.CreateDirectory(directory);
             }
 
-            var json = JsonUtility.ToJson(new ItemInfoList { items = items }.ToData() );
+            var json = JsonUtility.ToJson(new ItemInfoList { items = items }.ToData());
             File.WriteAllText(ItemsInfoPath, json);
 
             // 저장 후 ItemsInfoList 업데이트
@@ -81,9 +78,9 @@ namespace Editor.Scripts.Manager
                     path = i.path,
                     modelName = i.modelName,
                     lastModified = i.lastModified,
-                    type = (ItemInfo.ModelType) i.type,
-                    slot = (ItemInfo.ModelSlot) i.slot,
-                    status = (ItemInfo.ModelStatus) i.status,
+                    type = (ItemInfo.ModelType)i.type,
+                    slot = (ItemInfo.ModelSlot)i.slot,
+                    status = (ItemInfo.ModelStatus)i.status,
                     preview = null,
                     SelectedBlendShapes = i.SelectedBlendShapes
                 }).ToList();
@@ -96,11 +93,15 @@ namespace Editor.Scripts.Manager
         {
             var guids = AssetUtility.FindAssetsExcludingDirectory("t:Prefab", new[] { "Resources", "Eden", "lilToon" });
 
-            return guids
+            var items = guids
                 .Select(AssetDatabase.GUIDToAssetPath)
                 .Select(GetItem)
                 .OrderByDescending(p => p.modelName)
                 .ToList();
+
+            ItemsInfoList = items;
+
+            return items;
         }
 
         internal static ItemInfo GetItem(string itemPath)
@@ -109,11 +110,11 @@ namespace Editor.Scripts.Manager
             itemInfo.path = itemPath;
             itemInfo.modelName = Path.GetFileNameWithoutExtension(itemPath);
             itemInfo.lastModified = File.GetLastWriteTime(itemPath).ToString(CultureInfo.InvariantCulture);
-            
+
             // 로컬 데이터에서 해당 아이템 정보 가져오기
             var items = GetItemsInfo();
             var item = items.Find(i => i.path == itemPath);
-            
+
             if (item != null)
             {
                 itemInfo.type = item.type;
