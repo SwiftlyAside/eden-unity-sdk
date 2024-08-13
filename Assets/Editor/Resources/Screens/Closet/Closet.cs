@@ -11,13 +11,13 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using ScrollView = UnityEngine.UIElements.ScrollView;
 
-namespace Editor.Resources.Screens.Export
+namespace Editor.Resources.Screens.Closet
 {
-    public class Export : EditorWindow
+    public class Closet : EditorWindow
     {
         [SerializeField] private VisualTreeAsset m_VisualTreeAsset;
         private static VisualElement _container;
-        private static ScrollView _scrollView;
+        private static VisualElement _scrollView;
         private static List<ItemInfo> _items;
         private static Button _importButton;
         private static VisualElement _exportOptions;
@@ -27,18 +27,16 @@ namespace Editor.Resources.Screens.Export
         private static Preview _preview;
         private static Label _title;
         private static Label _subtitle;
-        private static VisualElement _tooltipContainer;
-        private static Label _tooltipContent;
-        private static Label _tooltipTarget;
-        
+        private static Button _applyButton;
+
         public static void Show(VisualElement root, Action onExportVrmClicked)
         {
             _container = root;
             _container.Clear();
 
-            var visualTree = UnityEngine.Resources.Load<VisualTreeAsset>("Screens/Export/Export");
+            var visualTree = UnityEngine.Resources.Load<VisualTreeAsset>("Screens/Closet/Closet");
             visualTree.CloneTree(_container);
-            _scrollView = _container.Q<ScrollView>("scroll-view");
+            _scrollView = _container.Q("scroll-view");
             _importButton = _container.Q<Button>("import-button");
             _importButton.clicked += ImportItem;
             _exportOptions = _container.Q("exportOptions");
@@ -47,15 +45,13 @@ namespace Editor.Resources.Screens.Export
             _exportVrmButton = _container.Q<Button>("exportVrmButton");
             _title = _container.Q<Label>("title");
             _subtitle = _container.Q<Label>("subtitle");
-            
+            _applyButton = _container.Q<Button>("applyButton");
+
             _exportUpkButton.clicked += ExportUnityPackage;
             _exportVrmButton.clicked += onExportVrmClicked;
             _preview = new Preview(_container.Q("preview"), EdenStudioInitializer.SelectedItem?.path ?? "");
             _preview.ShowContent();
             _exportOptions.style.display = DisplayStyle.None;
-            _tooltipContainer = _container.Q("tooltip-container");
-            _tooltipContent = _container.Q<Label>("tooltip-content");
-            _tooltipTarget = _container.Q<Label>("category-setup-label");
 
             _exportButton.clicked += () =>
             {
@@ -63,9 +59,6 @@ namespace Editor.Resources.Screens.Export
                     ? DisplayStyle.Flex
                     : DisplayStyle.None;
             };
-            
-            _tooltipTarget.RegisterCallback<MouseEnterEvent>(OnMouseEnter);
-            _tooltipTarget.RegisterCallback<MouseLeaveEvent>(OnMouseLeave);
 
             EdenStudioInitializer.OnSelectedItemChanged += OnSelectedItemChanged;
             LocalizationManager.OnLanguageChanged += RefreshLocalization;
@@ -77,29 +70,23 @@ namespace Editor.Resources.Screens.Export
             }
 
             LoadItems();
+
+            _applyButton.clicked += () =>
+            {
+                EditorApplication.ExecuteMenuItem("Window/General/Scene");
+            };
         }
-        
+
         private static void RefreshLocalization()
         {
             _importButton.text = LocalizationManager.GetLocalizedValue("import_prefab");
             _exportButton.text = LocalizationManager.GetLocalizedValue("export");
             _exportUpkButton.text = LocalizationManager.GetLocalizedValue("save_as_unitypackage");
             _exportVrmButton.text = LocalizationManager.GetLocalizedValue("save_as_vrm");
-            _title.text = LocalizationManager.GetLocalizedValue("prefab_list");
-            _subtitle.text = LocalizationManager.GetLocalizedValue("manage_prefabs_from_unitypackage");
+            _title.text = LocalizationManager.GetLocalizedValue("closet");
+            _subtitle.text = LocalizationManager.GetLocalizedValue("closet_description");
         }
-        
-        private static void OnMouseEnter(MouseEnterEvent evt)
-        {
-            _tooltipContent.text = LocalizationManager.GetLocalizedValue("closet_category_tooltip");
-            _tooltipContainer.AddToClassList("visible");
-        }
-        
-        private static void OnMouseLeave(MouseLeaveEvent evt)
-        {
-            _tooltipContainer.RemoveFromClassList("visible");
-        }
-        
+
         private static void ExportUnityPackage()
         {
             var selectedItem = EdenStudioInitializer.SelectedItem;
@@ -118,55 +105,70 @@ namespace Editor.Resources.Screens.Export
             var path = EditorUtility.OpenFilePanel("Import Item", "", "unitypackage");
             if (string.IsNullOrEmpty(path)) return;
             var extension = Path.GetExtension(path);
-            if (extension == ".unitypackage")
-            {
-                AssetDatabase.onImportPackageItemsCompleted += OnImportItemsCompleted;
-                AssetDatabase.ImportPackage(path, false);
-            }
-            // else if (extension == ".prefab")
-            // {
-            //     var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            //     var item = ItemManager.CreateItem(prefab);
-            //     _scrollView.Add(new ItemButton(item, () => { EdenStudioInitializer.SelectedItem = item; }));
-            // }
+            if (extension != ".unitypackage") return;
+            AssetDatabase.onImportPackageItemsCompleted += OnImportItemsCompleted;
+            AssetDatabase.ImportPackage(path, false);
         }
 
         private static void OnImportItemsCompleted(string[] importedAssets)
         {
             AssetDatabase.onImportPackageItemsCompleted -= OnImportItemsCompleted;
-            LoadItems(true);
+            LoadItems();
         }
 
-        private static async void LoadItems(bool fullRefresh = false)
+        private static async void LoadItems()
         {
             await Task.Yield();
-            GetItems(fullRefresh);
+            GetItems();
         }
 
-        private static async void GetItems(bool fullRefresh = false)
+        private static void GetItems()
         {
             _scrollView.Clear();
-            
+
             _items = ItemManager.GetAllPrefabsAsItems();
 
             if (_items.Count == 0)
             {
                 var button = new Button(() => ImportItem());
                 button.text = LocalizationManager.GetLocalizedValue("import_prefab");
-                
+
                 var label = new Label(LocalizationManager.GetLocalizedValue("add_prefabs_and_use_features"));
                 _scrollView.Add(label);
                 _scrollView.Add(button);
-
+                
                 return;
             }
-
-            foreach (var item in _items)
+            
+            foreach(var item in _items)
             {
-                Debug.Log($"Item: {item.modelName}");
-                var itemElement = new ItemButton(item, () => { EdenStudioInitializer.SelectedItem = item; });
-                _scrollView.Add(itemElement);
-                await Task.Yield();
+                Debug.Log(item.modelName);
+                Debug.Log(item.slot);
+            }
+            
+            //custom dropdown 추가
+            var dropdown = new CustomDropdownField("아바타 선택" , _items.FindAll(item => item.slot == ItemInfo.ModelSlot.Model));
+            dropdown.OnSelectedChanged += item =>
+            {
+                EdenStudioInitializer.SelectedItem = item;
+            };
+            _scrollView.Add(dropdown);
+            // 아바타를 제외한 아이템들을 카테고리별로 나누어 리스트뷰로 보여줌
+            var listPerCategory = _items
+                .Where(item => item.slot != ItemInfo.ModelSlot.Model)
+                .GroupBy(item => item.slot)
+                .OrderByDescending(group => group.Key);
+            
+            foreach (var category in listPerCategory)
+            {
+                var categoryListView = new CustomListView(LocalizationManager.GetLocalizedValue(category.Key.ToString().ToLower()), category.ToList());
+                _scrollView.Add(categoryListView);
+                categoryListView.OnSelectedChanged += item =>
+                {
+                    EdenStudioInitializer.SelectedItems[category.Key] = item;
+                    
+                    Debug.Log("SelectedItems: " + EdenStudioInitializer.SelectedItems[category.Key].Count);
+                };
             }
         }
 

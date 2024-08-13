@@ -28,6 +28,8 @@
     --black-hover: rgb(26, 26, 26);
     --black-active: rgb(51, 51, 51);
     --black-selected: rgb(0, 0, 0);
+    width: 100%;
+    height: 100%;
 }
 
 TemplateContainer {
@@ -364,7 +366,14 @@ TextField:disabled {
 .header {
     font-size: 24px;
     margin-bottom: 20px;
-    text-align: center;
+    color: var(--black);
+}
+
+.header-small {
+    font-size: 18px;
+    -unity-font-style: bold;
+    margin-bottom: 10px;
+    color: var(--black);
 }
 
 .section Label {
@@ -405,4 +414,34 @@ TextField:disabled {
     margin-top: 20px;
     color: var(--gray-500);
     -unity-text-align: middle-center;
+}
+
+.custom-dropdown-field {
+     width: 200px;
+     margin: 5px 0;
+ }
+
+.custom-dropdown-field .dropdown-menu {
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.tooltip-container {
+    display: none;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    position: absolute;
+    top: 50%;
+    left: 40%;
+}
+
+.tooltip-container.visible {
+    display: flex;
+}
+
+.item-button {
+    background-color: white;
+    color: var(--black);
 }

@@ -3,7 +3,7 @@
     <Style src="project://database/Assets/Editor/Resources/style.uss?fileID=7433441132597879392&amp;guid=3c7bc3f0f7d424845a31e1b7bc157f45&amp;type=3#style" />
     <ui:VisualElement name="header" class="mb-2" style="flex-grow: 0;">
         <ui:VisualElement style="flex-grow: initial; flex-direction: row;">
-            <ui:Label tabindex="-1" text="프리팹 목록" parse-escape-sequences="true" display-tooltip-when-elided="true" name="title" class="text-gray-900" style="font-size: 24px; -unity-font-style: bold;" />
+            <ui:Label tabindex="-1" text="옷장 관리" parse-escape-sequences="true" display-tooltip-when-elided="true" name="title" class="text-gray-900" style="font-size: 24px; -unity-font-style: bold;" />
             <ui:VisualElement style="flex-grow: 1; flex-direction: row-reverse; align-self: auto; align-items: flex-start;">
                 <ui:VisualElement style="flex-grow: initial;">
                     <ui:Button text="내보내기" parse-escape-sequences="true" display-tooltip-when-elided="true" name="exportButton" class="primary" />
@@ -19,11 +19,10 @@
     </ui:VisualElement>
     <ui:VisualElement style="flex-direction: row; flex-grow: 1; flex-shrink: 1;">
         <ui:VisualElement name="content" class="flex-1" style="flex-grow: 1; -unity-text-align: upper-left;">
-            <ui:Label tabindex="-1" text="카테고리 설정" parse-escape-sequences="true" display-tooltip-when-elided="true" name="category-setup-label" class="tooltip-target header" />
-            <ui:VisualElement name="tooltip-container" class="tooltip-container">
-                <ui:Label name="tooltip-content" text="This is a tooltip" />
+            <ui:ScrollView name="scroll-view" style="flex-grow: 1;" />
+            <ui:VisualElement name="footer" class="mt-2" style="flex-grow: 0;">
+                <ui:Button text="적용하기" parse-escape-sequences="true" display-tooltip-when-elided="true" name="applyButton" class="primary" />
             </ui:VisualElement>
-            <ui:ScrollView name="scroll-view" style="min-height: 100%; max-height: 100%;" />
         </ui:VisualElement>
         <ui:VisualElement name="preview" class="flex-1" style="flex-grow: 1;" />
     </ui:VisualElement>

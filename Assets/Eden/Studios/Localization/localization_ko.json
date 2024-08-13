@@ -83,6 +83,54 @@
     {
       "key": "register_info",
       "value": "기존 EDEN 회원은 새로운 계정을 생성해주세요."
+    },
+    {
+      "key": "closet",
+      "value": "옷장 관리"
+    },
+    {
+      "key": "closet_description",
+      "value": "아바타를 선택한 후 VRChat 옷장을 설정하세요.\n프리팹 목록에서 카테고리를 설정한 아이템만 적용됩니다."
+    },
+    {
+      "key": "closet_category_tooltip",
+      "value": "아바타 모델\n기존 아바타 모델\n머리\n헤어스타일, 모자, 머리 장식, 안경, 마스크\n상반신\n상의 : 티셔츠, 셔츠, 블라우스, 자켓, 스웨터\n액세서리 : 목걸이, 스카프\n하반신\n바지, 스커트, 반바지, 타이츠, 레깅스, 신발\n손/발\n장갑, 반지, 팔목, 손목시계\n전체\n전신 옷, 드레스, 코스튬\n기타 액세서리 \n가방, 기타"
+    }, 
+    {
+      "key": "model",
+      "value": "아바타 모델"
+    },
+    {
+      "key": "hair",
+      "value": "머리"
+    },
+    {
+      "key": "upperbody",
+      "value": "상반신"
+    },
+    {
+      "key": "lowerbody",
+      "value": "하반신"
+    },
+    {
+      "key": "hand",
+      "value": "손"
+    },
+    {
+      "key": "foot",
+      "value": "발"
+    },
+    {
+      "key": "fullbody",
+      "value": "전체"
+    },
+    {
+      "key": "accessory",
+      "value": "기타 액세서리"
+    },
+    {
+      "key": "other",
+      "value": "기타"
     }
   ]
 }

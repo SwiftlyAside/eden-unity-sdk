@@ -1,4 +1,5 @@
 using System;
+using Editor.Resources.Screens.Closet;
 using Editor.Resources.Screens.Export;
 using Editor.Resources.Screens.Setting;
 using Editor.Scripts.Manager;
@@ -23,8 +24,10 @@ namespace Editor.Resources
         public static StyleSheet style;
         public static StyleSheet tailwind;
         private static Button prefab_list_button;
+        private static Button closet_button;
         private static Button settings_button;
         private static Label prefab_list_label;
+        private static Label closet_label;
         private static Label settings_label;
         private static EnumField languageDropdown;
 
@@ -53,6 +56,8 @@ namespace Editor.Resources
             container = labelFromUXML.Q("container");
             prefab_list_button = labelFromUXML.Q<Button>("prefab_list_button");
             prefab_list_label = labelFromUXML.Q<Label>("prefab_list_label");
+            closet_button = labelFromUXML.Q<Button>("closet_button");
+            closet_label = labelFromUXML.Q<Label>("closet_label");
             settings_button = labelFromUXML.Q<Button>("settings_button");
             settings_label = labelFromUXML.Q<Label>("settings_label");
             
@@ -60,12 +65,15 @@ namespace Editor.Resources
             {
                 prefab_list_label.text = LocalizationManager.GetLocalizedValue("prefab_list");
                 settings_label.text = LocalizationManager.GetLocalizedValue("settings");
+                closet_label.text = LocalizationManager.GetLocalizedValue("closet");
             };
             
             prefab_list_label.text = LocalizationManager.GetLocalizedValue("prefab_list");
             settings_label.text = LocalizationManager.GetLocalizedValue("settings");
+            closet_label.text = LocalizationManager.GetLocalizedValue("closet");
             
             prefab_list_button.clicked += OnExportClicked;
+            closet_button.clicked += OnClosetClicked;
             settings_button.clicked += OnSettingsClicked;
             
             Export.Show(container, OnExportVrmClicked);
@@ -87,6 +95,11 @@ namespace Editor.Resources
         private void OnExportClicked()
         {
             Export.Show(container, OnExportVrmClicked);
+        }
+        
+        private void OnClosetClicked()
+        {
+            Closet.Show(container, OnExportVrmClicked);
         }
         
         private void OnSettingsClicked()

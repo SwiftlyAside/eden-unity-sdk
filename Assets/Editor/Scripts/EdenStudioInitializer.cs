@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Editor.Scripts.Manager;
-using Editor.Scripts.Struct;
 using UnityEditor;
 
 namespace Editor.Scripts
@@ -26,6 +25,25 @@ namespace Editor.Scripts
                 OnSelectedItemChanged?.Invoke(value);
             }
         }
+        
+        public static void InvokeSelectedItemChanged()
+        {
+            OnSelectedItemChanged?.Invoke(SelectedItem);
+        }
+        
+        // 그룹별 선택된 아이템 정보
+        public static Dictionary<ItemInfo.ModelSlot, List<ItemInfo>> SelectedItems = new()
+        {
+            { ItemInfo.ModelSlot.FullBody , new List<ItemInfo>()},
+            {ItemInfo.ModelSlot.Hair, new List<ItemInfo>()},
+            {ItemInfo.ModelSlot.UpperBody, new List<ItemInfo>()},
+            {ItemInfo.ModelSlot.LowerBody, new List<ItemInfo>()},
+            {ItemInfo.ModelSlot.Hand, new List<ItemInfo>()},
+            {ItemInfo.ModelSlot.Foot, new List<ItemInfo>()},
+            {ItemInfo.ModelSlot.Accessory, new List<ItemInfo>()},
+            {ItemInfo.ModelSlot.Other, new List<ItemInfo>()},
+            
+        };
 
         static EdenStudioInitializer()
         {

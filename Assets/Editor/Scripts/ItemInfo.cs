@@ -10,7 +10,7 @@ namespace Editor.Scripts
     {
         public enum ModelType { VRChat, VRM, Other }
         // 미선택, 아바타 모델, 머리, 상반신, 하반신, 손, 발, 전신, 악세사리, 효과, 기타
-        public enum ModelSlot { None, Model, Head, UpperBody, LowerBody, Hand, Foot, FullBody, Accessory, Effect, Other }
+        public enum ModelSlot { None, Model, Hair, UpperBody, LowerBody, Hand, Foot, FullBody, Accessory, Effect, Other }
         public enum ModelStatus { Pinned, Show, Hidden, Other }
 
         public string path;

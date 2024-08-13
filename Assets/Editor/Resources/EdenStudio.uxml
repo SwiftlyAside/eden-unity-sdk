@@ -5,6 +5,9 @@
             <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="prefab_list_button" class="tab-button shadow">
                 <ui:Label text="프리팹 목록" name="prefab_list_label" />
             </ui:Button>
+            <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="closet_button" class="tab-button">
+                <ui:Label text="옷장 관리" name="closet_label" />
+            </ui:Button>
             <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="settings_button" class="tab-button">
                 <ui:Label text="설정" name="settings_label" />
             </ui:Button>

@@ -83,6 +83,54 @@
     {
       "key": "register_info",
       "value": "Please create a new account for existing EDEN members."
+    },
+    {
+      "key": "closet",
+      "value": "Closet"
+    },
+    {
+      "key": "closet_description",
+      "value": "아바타를 선택한 후 VRChat 옷장을 설정하세요.\n프리팹 목록에서 카테고리를 설정한 아이템만 적용됩니다."
+    },
+    {
+      "key": "closet_category_tooltip",
+      "value": "Avatar Models\nAvatar Models\nHair\nHairstyles, Hats, Headdresses, Glasses, Masks\nUpper body\nTops: T-shirts, shirts, blouses, jackets, sweaters\nAccessories: necklaces, scarves\nLower body\nPants, skirts, shorts, tights, leggings, shoes\nHands/Feet\nGloves, rings, cuffs, wristbands, watches\nFull body\nFull body clothes, dresses, costumes\nOther accessories\nBags, Other"
+    },
+    {
+      "key": "model",
+      "value": "Avatar Models"
+    },
+    {
+      "key": "hair",
+      "value": "Hair"
+    },
+    {
+      "key": "upperbody",
+      "value": "Upper body"
+    },
+    {
+      "key": "lowerbody",
+      "value": "Lower body"
+    },
+    {
+      "key": "hand",
+      "value": "Hands"
+    },
+    {
+      "key": "foot",
+      "value": "Feet"
+    },
+    {
+      "key": "fullbody",
+      "value": "Full body"
+    },
+    {
+      "key": "accessory",
+      "value": "Accessory"
+    },
+    {
+      "key": "other",
+      "value": "Other"
     }
   ]
 }

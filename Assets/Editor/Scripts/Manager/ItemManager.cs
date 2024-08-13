@@ -67,7 +67,8 @@ namespace Editor.Scripts.Manager
 
         internal static List<ItemInfo> GetItemsInfo()
         {
-            if (ItemsInfoList != null) return ItemsInfoList;
+            Debug.Log("GetItemsInfo");
+            // if (ItemsInfoList != null) return ItemsInfoList;
 
             if (File.Exists(ItemsInfoPath))
             {
