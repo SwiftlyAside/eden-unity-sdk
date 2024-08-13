@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using Editor.Scripts.Struct;
 using Editor.Scripts.Util;
 using UnityEditor;
 using UnityEngine;
@@ -27,9 +29,9 @@ namespace Editor.Scripts.Manager
 
         public static void UpdateItemsInfo()
         {
-            var allItems = GetAllPrefabsAsItems();
-
-            Debug.Log(allItems.Count);
+            var allItems = GetItemsInfo();
+            
+            if (allItems == null) allItems = GetAllPrefabsAsItems();
 
             allItems = allItems.OrderByDescending(i => i.status == ItemInfo.ModelStatus.Pinned)
                 .ThenByDescending(i => i.lastModified)
@@ -41,6 +43,14 @@ namespace Editor.Scripts.Manager
                 ItemsInfoList = allItems;
             }
         }
+        
+        internal static void UpdateItemInfo(ItemInfo item, ItemInfo.ModelSlot slot)
+        {
+            var items = ItemsInfoList;
+            var index = items.FindIndex(i => i.path == item.path && i.modelName == item.modelName);
+            items[index].slot = slot;
+            SaveItemsInfo(items);
+        }
 
         internal static void SaveItemsInfo(List<ItemInfo> items)
         {
@@ -51,23 +61,32 @@ namespace Editor.Scripts.Manager
                 Directory.CreateDirectory(directory);
             }
 
-            using (FileStream fileStream = new FileStream(ItemsInfoPath, FileMode.Create))
-            {
-                var itemsInfo = ScriptableObject.CreateInstance<ItemInfoList>();
-                itemsInfo.items = items;
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(fileStream, itemsInfo.ToData());
-            }
+            var json = JsonUtility.ToJson(new ItemInfoList { items = items }.ToData() );
+            File.WriteAllText(ItemsInfoPath, json);
+
+            // 저장 후 ItemsInfoList 업데이트
+            ItemsInfoList = items;
         }
 
         internal static List<ItemInfo> GetItemsInfo()
         {
             if (ItemsInfoList != null) return ItemsInfoList;
 
-            using (FileStream fileStream = new FileStream(ItemsInfoPath, FileMode.Open))
+            if (File.Exists(ItemsInfoPath))
             {
-                BinaryFormatter formatter = new BinaryFormatter();
-                ItemsInfoList = (List<ItemInfo>)formatter.Deserialize(fileStream);
+                var json = File.ReadAllText(ItemsInfoPath);
+                var itemsInfoList = JsonUtility.FromJson<ItemInfoListData>(json);
+                ItemsInfoList = itemsInfoList.items.Select(i => new ItemInfo
+                {
+                    path = i.path,
+                    modelName = i.modelName,
+                    lastModified = i.lastModified,
+                    type = (ItemInfo.ModelType) i.type,
+                    slot = (ItemInfo.ModelSlot) i.slot,
+                    status = (ItemInfo.ModelStatus) i.status,
+                    preview = null,
+                    SelectedBlendShapes = i.SelectedBlendShapes
+                }).ToList();
             }
 
             return ItemsInfoList;
@@ -80,7 +99,7 @@ namespace Editor.Scripts.Manager
             return guids
                 .Select(AssetDatabase.GUIDToAssetPath)
                 .Select(GetItem)
-                .OrderByDescending(p => p.lastModified)
+                .OrderByDescending(p => p.modelName)
                 .ToList();
         }
 
@@ -90,6 +109,25 @@ namespace Editor.Scripts.Manager
             itemInfo.path = itemPath;
             itemInfo.modelName = Path.GetFileNameWithoutExtension(itemPath);
             itemInfo.lastModified = File.GetLastWriteTime(itemPath).ToString(CultureInfo.InvariantCulture);
+            
+            // 로컬 데이터에서 해당 아이템 정보 가져오기
+            var items = GetItemsInfo();
+            var item = items.Find(i => i.path == itemPath);
+            
+            if (item != null)
+            {
+                itemInfo.type = item.type;
+                itemInfo.slot = item.slot;
+                itemInfo.status = item.status;
+                itemInfo.preview = item.preview;
+                itemInfo.SelectedBlendShapes = item.SelectedBlendShapes;
+            }
+            else
+            {
+                itemInfo.type = ItemInfo.ModelType.Other;
+                itemInfo.slot = ItemInfo.ModelSlot.None;
+                itemInfo.status = ItemInfo.ModelStatus.Show;
+            }
 
             return itemInfo;
         }

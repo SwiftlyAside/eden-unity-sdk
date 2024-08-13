@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using Editor.Scripts;
+using Editor.Scripts.Manager;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -7,8 +9,14 @@ namespace Editor.Resources.Components
 {
     public class ItemButton: Button
     {
+        private ItemInfo.ModelSlot _selectedCategory;
+        private ItemInfo _selectedItem;
+        
         public ItemButton(ItemInfo item, Action onClick)
         {
+            _selectedItem = item;
+            _selectedCategory = item.slot;
+            
             AddToClassList("item-button");
             var preview = new Image { image = item.preview, scaleMode = ScaleMode.ScaleToFit, style = { width = 64, height = 64 } };
             Add(preview);
@@ -20,6 +28,7 @@ namespace Editor.Resources.Components
                     flexDirection = FlexDirection.Column,
                     alignItems = Align.FlexStart,
                     justifyContent = Justify.Center,
+                    flexGrow = 1,
                 }
             };
 
@@ -31,23 +40,20 @@ namespace Editor.Resources.Components
                     unityFontStyleAndWeight = FontStyle.Bold
                 }
             };
+            
+            var categoryDropdown = new DropdownField
+            {
+                label = "",
+                choices = Enum.GetNames(typeof(ItemInfo.ModelSlot)).ToList(),
+                value = item.slot.ToString()
+            };
+            categoryDropdown.EnableInClassList("w-one-third", true);
+            categoryDropdown.RegisterValueChangedCallback(OnDropdownChanged);
+            
             labelContainer.Add(label);
 
-            // vrc sdk check
-            // UnityEditor.EditorApplication.delayCall += async () =>
-            // {
-            //     try
-            //     {
-            //         var a
-            //     }
-            //     catch (Exception e)
-            //     {
-            //         Debug.LogError(e);
-            //     }
-            // };
-
             Add(labelContainer);
-
+            Add(categoryDropdown);
 
             clicked += onClick;
             clicked += () =>
@@ -61,6 +67,22 @@ namespace Editor.Resources.Components
                     }
                 }
             };
+        }
+        
+        private void RefreshLocalization()
+        {
+            // label.text = LocalizationManager.GetLocalizedValue("settings");
+            // emailLabel.text = LocalizationManager.GetLocalizedValue("email");
+            // languageLabel.text = LocalizationManager.GetLocalizedValue("language");
+            // logoutButton.text = LocalizationManager.GetLocalizedValue("logout");
+        }
+
+        private void OnDropdownChanged(ChangeEvent<string> evt)
+        {
+            var category = (ItemInfo.ModelSlot)Enum.Parse(typeof(ItemInfo.ModelSlot), evt.newValue);
+            _selectedCategory = category;
+            _selectedItem.slot = category;
+            ItemManager.UpdateItemInfo(_selectedItem, category);
         }
     }
 }

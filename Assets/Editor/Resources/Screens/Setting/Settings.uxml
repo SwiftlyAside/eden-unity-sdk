@@ -16,7 +16,7 @@
                     <!-- 각 섹션을 VisualElement로 구분 -->
                     <ui:VisualElement class="section">
                         <ui:Label text="이메일 주소" name="email_label" />
-                        <ui:TextField readonly="true" value="eden@mail.com" />
+                        <ui:TextField readonly="true" value="eden@mail.com" name="email_field" />
                     </ui:VisualElement>
                     
                     <ui:VisualElement class="section">

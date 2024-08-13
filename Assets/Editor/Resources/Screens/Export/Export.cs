@@ -114,19 +114,20 @@ namespace Editor.Resources.Screens.Export
         private static void OnImportItemsCompleted(string[] importedAssets)
         {
             AssetDatabase.onImportPackageItemsCompleted -= OnImportItemsCompleted;
-            LoadItems();
+            LoadItems(true);
         }
 
-        private static async void LoadItems()
+        private static async void LoadItems(bool fullRefresh = false)
         {
             await Task.Yield();
-            GetItems();
+            GetItems(fullRefresh);
         }
 
-        private static async void GetItems()
+        private static async void GetItems(bool fullRefresh = false)
         {
             _scrollView.Clear();
-            _items = ItemManager.GetAllPrefabsAsItems(true);
+            
+            _items = ItemManager.GetAllPrefabsAsItems();
 
             if (_items.Count == 0)
             {
@@ -140,9 +141,10 @@ namespace Editor.Resources.Screens.Export
                 return;
             }
 
-            foreach (var itemElement in _items.Select(item =>
-                         new ItemButton(item, () => { EdenStudioInitializer.SelectedItem = item; })))
+            foreach (var item in _items)
             {
+                Debug.Log($"Item: {item.modelName}");
+                var itemElement = new ItemButton(item, () => { EdenStudioInitializer.SelectedItem = item; });
                 _scrollView.Add(itemElement);
                 await Task.Yield();
             }
