@@ -8,7 +8,7 @@ namespace Editor.Scripts.Manager
 {
     public static class AuthManager
     {
-        private const string baseUrl = "https://dev-api.eden-world.net/";
+        private const string baseUrl = "https://api.eden-world.net/";
         private const string loginEndpoint = "v2/auth/email/login";
 
         private static string _token;
@@ -101,6 +101,7 @@ namespace Editor.Scripts.Manager
         {
             // Define user fields here
             public string email;
+            public string username;
         }
     }
 }

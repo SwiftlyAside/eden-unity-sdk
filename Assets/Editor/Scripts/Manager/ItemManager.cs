@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using Editor.Scripts.Struct;
 using Editor.Scripts.Util;
 using UnityEditor;
 using UnityEngine;
@@ -108,6 +109,25 @@ namespace Editor.Scripts.Manager
             itemInfo.path = itemPath;
             itemInfo.modelName = Path.GetFileNameWithoutExtension(itemPath);
             itemInfo.lastModified = File.GetLastWriteTime(itemPath).ToString(CultureInfo.InvariantCulture);
+            
+            // 로컬 데이터에서 해당 아이템 정보 가져오기
+            var items = GetItemsInfo();
+            var item = items.Find(i => i.path == itemPath);
+            
+            if (item != null)
+            {
+                itemInfo.type = item.type;
+                itemInfo.slot = item.slot;
+                itemInfo.status = item.status;
+                itemInfo.preview = item.preview;
+                itemInfo.SelectedBlendShapes = item.SelectedBlendShapes;
+            }
+            else
+            {
+                itemInfo.type = ItemInfo.ModelType.Other;
+                itemInfo.slot = ItemInfo.ModelSlot.None;
+                itemInfo.status = ItemInfo.ModelStatus.Show;
+            }
 
             return itemInfo;
         }

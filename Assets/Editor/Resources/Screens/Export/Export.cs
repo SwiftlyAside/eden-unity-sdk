@@ -127,13 +127,7 @@ namespace Editor.Resources.Screens.Export
         {
             _scrollView.Clear();
             
-            if (fullRefresh)
-            {
-                _items = ItemManager.GetAllPrefabsAsItems();
-            } else if (_items == null)
-            {
-                _items = ItemManager.GetItemsInfo();
-            }
+            _items = ItemManager.GetAllPrefabsAsItems();
 
             if (_items.Count == 0)
             {
