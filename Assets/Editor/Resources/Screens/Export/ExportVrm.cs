@@ -287,7 +287,7 @@ namespace Editor.Resources.Screens.Export
             PrefabUtility.SaveAsPrefabAsset(prefabClone, "Assets/Eden/" + prefabClone.name + ".prefab");
 
             // 이 프리팹을 사용
-            prefab = prefabClone;
+            prefab = nadena.dev.ndmf.AvatarProcessor.ProcessAvatarUI(prefabClone);
 
             if (toVrm0)
             {
