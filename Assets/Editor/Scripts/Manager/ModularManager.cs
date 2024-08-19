@@ -330,5 +330,45 @@ namespace Editor.Scripts.Manager
             // 아바타 디스크립터가 없다면 false 반환
             return existingItem;
         }
+
+        public static void ToggleCostume(bool active)
+        {
+            // 선택된 아바타 프리팹 로드
+            GameObject avatarObject = FindAvatarDescriptor(PrefabUtility.LoadPrefabContents(EdenStudioInitializer.SelectedItem.path));
+            Debug.Log($"{EdenStudioInitializer.SelectedItem.path} is selected");
+            
+            var preset = PresetManager.LoadOrCreateAvatarPreset(EdenStudioInitializer.SelectedItem.modelName);
+
+            // 프리셋에 정의된 의상들 활성화/비활성화
+            SkinnedMeshRenderer[] renderers = avatarObject.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+            foreach (SkinnedMeshRenderer renderer in renderers)
+            {
+                if (preset.costumeNames == null) continue;
+                if (System.Array.Exists(preset.costumeNames, name => renderer.name.Contains(name)))
+                {
+                    renderer.gameObject.SetActive(active);
+                }
+            }
+
+            // 블렌드쉐이프 설정
+            foreach (var renderer in renderers)
+            {
+                Mesh mesh = renderer.sharedMesh;
+                if (mesh != null && preset.blendShapes != null)
+                {
+                    foreach (var blendShape in preset.blendShapes)
+                    {
+                        int blendShapeIndex = mesh.GetBlendShapeIndex(blendShape.blendShapeName);
+                        if (blendShapeIndex >= 0)
+                        {
+                            renderer.SetBlendShapeWeight(blendShapeIndex, active ? blendShape.value : 0);
+                        }
+                    }
+                }
+            }
+
+            // 변경된 내용 프리팹에 저장
+            PrefabUtility.SaveAsPrefabAsset(avatarObject, EdenStudioInitializer.SelectedItem.path);
+        }
     }
 }

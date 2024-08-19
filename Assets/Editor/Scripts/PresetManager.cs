@@ -7,6 +7,7 @@ namespace Editor.Scripts
     public static class PresetManager
     {
         private const string Vrm10MorphTargetPresetPath = "Assets/Eden/Presets";
+        private const string AvatarPresetsPath = "Assets/Eden/Presets/AvatarPresets";
         
         public static Vrm10MorphTargetPreset LoadOrCreateVrm10MorphTargetPreset(string path)
         {
@@ -37,6 +38,45 @@ namespace Editor.Scripts
                 existingPreset.sad = preset.sad;
                 existingPreset.surprised = preset.surprised;
                 existingPreset.relaxed = preset.relaxed;
+            }
+            else
+            {
+                AssetDatabase.CreateAsset(preset, presetPath);
+            }
+            EditorUtility.SetDirty(preset);
+            AssetDatabase.SaveAssets();
+        }
+        
+        public static AvatarPreset LoadOrCreateAvatarPreset(string path)
+        {
+            //Presets 폴더 없으면 생성
+            if (!Directory.Exists("Assets/Eden/Presets"))
+            {
+                Directory.CreateDirectory("Assets/Eden/Presets");
+            }
+            
+            if (!Directory.Exists("Assets/Eden/Presets/AvatarPresets"))
+            {
+                Directory.CreateDirectory("Assets/Eden/Presets/AvatarPresets");
+            }
+            
+            var presetPath = AvatarPresetsPath + "/" + path + ".asset";
+            var preset = AssetDatabase.LoadAssetAtPath<AvatarPreset>(presetPath);
+            if (preset != null) return preset;
+            preset = ScriptableObject.CreateInstance<AvatarPreset>();
+            AssetDatabase.CreateAsset(preset, presetPath);
+            AssetDatabase.SaveAssets();
+            return preset;
+        }
+        
+        public static void SaveAvatarPreset(AvatarPreset preset)
+        {
+            var presetPath = AvatarPresetsPath + "/" + preset.name + ".asset";
+            var existingPreset = AssetDatabase.LoadAssetAtPath<AvatarPreset>(presetPath);
+            if (existingPreset)
+            {
+                existingPreset.costumeNames = preset.costumeNames;
+                existingPreset.blendShapes = preset.blendShapes;
             }
             else
             {

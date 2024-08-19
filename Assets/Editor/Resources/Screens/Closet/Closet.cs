@@ -168,6 +168,19 @@ namespace Editor.Resources.Screens.Closet
                     EdenStudioInitializer.SelectedItems[category.Key] = item;
                     
                     Debug.Log("SelectedItems: " + EdenStudioInitializer.SelectedItems[category.Key].Count);
+                    
+                    // selectedItems key 하나라도 체크되어 있으면
+                    if (EdenStudioInitializer.SelectedItems.Values.Any(selectedItems => selectedItems.Count > 0))
+                    {
+                        Debug.Log("ToggleCostume: false");
+                        // 아바타가 기본으로 착용한 아이템을 숨긴다
+                        ModularManager.ToggleCostume(false);
+                    } 
+                    else
+                    { 
+                        Debug.Log("ToggleCostume: true");
+                        ModularManager.ToggleCostume(true);
+                    }
                 };
             }
         }
