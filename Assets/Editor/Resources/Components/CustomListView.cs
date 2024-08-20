@@ -37,10 +37,10 @@ namespace Editor.Resources.Components
                     _selectedItems.Remove(item);
                 }
 
-                ModularManager.ToggleObject(item.path);
+                ModularManager.ToggleObject(item.path, item.slot);
                 OnSelectedChanged?.Invoke(_selectedItems);
                 EdenStudioInitializer.InvokeSelectedItemChanged();
-            }, ModularManager.HasObject(item.path)))
+            }, ModularManager.HasObject(item.path, item.slot)))
             )
             {
                 itemButtons.Add(itemButton);
@@ -53,9 +53,7 @@ namespace Editor.Resources.Components
             {
                 foreach (var button in itemButtons)
                 {
-                    Debug.Log($"button path: {button.GetPath()}");
-                    Debug.Log(ModularManager.HasObject(button.GetPath()));
-                    button.SetSelected(ModularManager.HasObject(button.GetPath()));
+                    button.SetSelected(ModularManager.HasObject(button.GetPath(), button.GetSlot()));
                 }
             };
             

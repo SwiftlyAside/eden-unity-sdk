@@ -445,3 +445,18 @@ TextField:disabled {
     background-color: white;
     color: var(--black);
 }
+
+.item-button:hover {
+    background-color: var(--primary-hover);
+    color: white;
+}
+
+.item-button:active {
+    background-color: var(--primary-active);
+    color: white;
+}
+
+.item-button.selected {
+    background-color: var(--primary);
+    color: white;
+}

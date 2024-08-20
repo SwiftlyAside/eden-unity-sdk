@@ -71,6 +71,11 @@ namespace Editor.Resources.Components
             return _selectedItem.path;
         }
         
+        public ItemInfo.ModelSlot GetSlot()
+        {
+            return _selectedItem.slot;
+        }
+        
         public void SetSelected(bool selected)
         {
             _checkbox.SetValueWithoutNotify(selected);

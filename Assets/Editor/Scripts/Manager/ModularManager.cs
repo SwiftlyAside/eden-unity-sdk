@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using nadena.dev.modular_avatar.core;
 using UnityEditor;
@@ -17,8 +18,11 @@ namespace Editor.Scripts.Manager
         private static VRCExpressionsMenu _expressionsMenu;
         private static VRCExpressionsMenu _closetMenu;
         private static AnimatorController _animatorController;
+        private static string[] _defaultCostumeNames = {"hair", "top", "bottom", "shoes", "accessory", "costume"};
+        private static GameObject _cachedItem;
+        private static GameObject _cachedAvatar;
 
-        public static void ToggleObject(string targetPath)
+        public static void ToggleObject(string targetPath, ItemInfo.ModelSlot slot)
         {
             // 선택된 아바타 프리팹 로드
             _selectedObject = PrefabUtility.LoadPrefabContents(targetPath);
@@ -27,10 +31,14 @@ namespace Editor.Scripts.Manager
             
             if (_selectedObject && avatarObject)
             {
-                GameObject clothes = CheckAlreadyExists(avatarObject);
+                GameObject clothes = CheckAlreadyExists(avatarObject, slot);
                 if (!clothes)
                 {
-                    GameObject instance = Object.Instantiate(_selectedObject, avatarObject.transform);
+                    // hair면 target을 avatar의 HumanoidHeadBone으로 설정, 그 외에는 avatarObject로 설정
+                    var target = slot == ItemInfo.ModelSlot.Hair
+                        ? avatarObject.GetComponent<Animator>().GetBoneTransform(HumanBodyBones.Head)
+                        : avatarObject.transform;
+                    GameObject instance = Object.Instantiate(_selectedObject, target, slot == ItemInfo.ModelSlot.Hair);
                     instance.name = _selectedObject.name; // 인스턴스 이름을 원본 프리팹 이름과 동일하게 설정
 
                     // MenuCommand를 생성하여 SetupOutfit 메서드에 전달
@@ -62,9 +70,13 @@ namespace Editor.Scripts.Manager
             }
         }
 
-        private static GameObject CheckAlreadyExists(GameObject avatarObject)
+        private static GameObject CheckAlreadyExists(GameObject avatarObject, ItemInfo.ModelSlot slot)
         {
-            Transform foundTransform = avatarObject.transform.Find(_selectedObject.name);
+            // hair는 avatar의 HumanoidHeadBone에, 그 외에는 avatarObject에 있는지 확인
+            Transform targetTransform = slot == ItemInfo.ModelSlot.Hair
+                ? avatarObject.GetComponent<Animator>().GetBoneTransform(HumanBodyBones.Head)
+                : avatarObject.transform;
+            Transform foundTransform = targetTransform.Find(_selectedObject.name);
             return foundTransform ? foundTransform.gameObject : null;
         }
 
@@ -311,45 +323,77 @@ namespace Editor.Scripts.Manager
             AssetDatabase.SaveAssets();
         }
 
-        public static bool HasObject(string itemPath)
-        {
+        public static bool HasObject(string itemPath, ItemInfo.ModelSlot slot)
+        { 
             // 아이템 경로로 프리팹 로드
-            GameObject item = PrefabUtility.LoadPrefabContents(itemPath);
-            var avatarObject = EdenStudioInitializer.SelectedItem ? FindAvatarDescriptor(PrefabUtility.LoadPrefabContents(EdenStudioInitializer.SelectedItem.path)) : null;
-            
+            if (_cachedItem == null || _cachedItem.name != itemPath)
+            {
+                if (_cachedItem != null)
+                {
+                    PrefabUtility.UnloadPrefabContents(_cachedItem);
+                }
+                _cachedItem = PrefabUtility.LoadPrefabContents(itemPath);
+            }
+
+            if (EdenStudioInitializer.SelectedItem && (_cachedAvatar == null || _cachedAvatar.name != EdenStudioInitializer.SelectedItem.path))
+            {
+                if (_cachedAvatar != null)
+                {
+                    PrefabUtility.UnloadPrefabContents(_cachedAvatar);
+                }
+                _cachedAvatar = FindAvatarDescriptor(PrefabUtility.LoadPrefabContents(EdenStudioInitializer.SelectedItem.path));
+            }
+
             // 아이템이 로드되지 않았다면 false 반환
-            if (!item || !avatarObject)
+            if (!_cachedItem || !_cachedAvatar)
             {
                 return false;
             }
-            Debug.Log($"{EdenStudioInitializer.SelectedItem.path} is selected");
-            
-            // 아이템이 로드되었다면 아바타 디스크립터 찾기
-            var existingItem = avatarObject.transform.Find(item.name);
-            
+
+            // 아이템이 로드되었다면 아바타 디스크립터 찾기 (hair는 HumanoidHeadBone에, 그 외에는 avatarObject에 있는지 확인)
+            var existingItem = slot == ItemInfo.ModelSlot.Hair
+                ? _cachedAvatar.GetComponent<Animator>().GetBoneTransform(HumanBodyBones.Head).Find(_cachedItem.name)
+                : _cachedAvatar.transform.Find(_cachedItem.name);
+
             // 아바타 디스크립터가 없다면 false 반환
-            return existingItem;
+            return existingItem != null;
         }
 
         public static void ToggleCostume(bool active)
         {
             // 선택된 아바타 프리팹 로드
             GameObject avatarObject = FindAvatarDescriptor(PrefabUtility.LoadPrefabContents(EdenStudioInitializer.SelectedItem.path));
-            Debug.Log($"{EdenStudioInitializer.SelectedItem.path} is selected");
             
             var preset = PresetManager.LoadOrCreateAvatarPreset(EdenStudioInitializer.SelectedItem.modelName);
-
-            // 프리셋에 정의된 의상들 활성화/비활성화
-            SkinnedMeshRenderer[] renderers = avatarObject.GetComponentsInChildren<SkinnedMeshRenderer>(true);
-            foreach (SkinnedMeshRenderer renderer in renderers)
+            // active가 false일 때만 블렌드쉐이프 기록
+            if (!active)
             {
-                if (preset.costumeNames == null) continue;
-                if (System.Array.Exists(preset.costumeNames, name => renderer.name.Contains(name)))
-                {
-                    renderer.gameObject.SetActive(active);
-                }
+                RecordBlendShapes(avatarObject);
             }
 
+            // 프리셋에 정의된 의상들 활성화/비활성화 (Body 제외)
+            SkinnedMeshRenderer[] renderers = avatarObject.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+            renderers = renderers.Where(renderer => renderer.name.Contains("Body") == false).ToArray();
+            foreach (SkinnedMeshRenderer renderer in renderers)
+            {
+                // preset costumeNames가 비어있으면 모든 렌더러 활성화 혹은 비활성화
+                if (preset.costumeNames == null || !preset.costumeNames.Any())
+                {
+                    renderer.enabled = active;
+                }
+                else
+                {
+                    // preset costumeNames에 포함된 렌더러만 활성화 혹은 비활성화
+                    foreach (var costumeName in preset.costumeNames)
+                    {
+                        if (renderer.name.Contains(costumeName))
+                        {
+                            renderer.enabled = active;
+                        }
+                    }
+                }
+            }
+            
             // 블렌드쉐이프 설정
             foreach (var renderer in renderers)
             {
@@ -369,6 +413,34 @@ namespace Editor.Scripts.Manager
 
             // 변경된 내용 프리팹에 저장
             PrefabUtility.SaveAsPrefabAsset(avatarObject, EdenStudioInitializer.SelectedItem.path);
+        }
+        
+        public static void RecordBlendShapes(GameObject targetObject)
+        {
+            var preset = PresetManager.LoadOrCreateAvatarPreset(targetObject.name);
+            preset.blendShapes = new System.Collections.Generic.List<AvatarPreset.BlendShapeData>();
+            
+            SkinnedMeshRenderer[] renderers = targetObject.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+            renderers = renderers.Where(renderer => renderer.name.StartsWith("Body") == false).ToArray();
+            foreach (SkinnedMeshRenderer renderer in renderers)
+            {
+                Mesh mesh = renderer.sharedMesh;
+                if (mesh != null)
+                {
+                    for (int i = 0; i < mesh.blendShapeCount; i++)
+                    {
+                        string blendShapeName = mesh.GetBlendShapeName(i);
+                        float value = renderer.GetBlendShapeWeight(i);
+                        preset.blendShapes.Add(new AvatarPreset.BlendShapeData
+                        {
+                            blendShapeName = blendShapeName,
+                            value = value
+                        });
+                    }
+                }
+            }
+            
+            PresetManager.SaveAvatarPreset(preset);
         }
     }
 }
